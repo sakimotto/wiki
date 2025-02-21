@@ -1,101 +1,86 @@
-# Wiki.js Deployment Configuration
+# Wiki.js Deployment Guide
 
-## 1. Infrastructure (Google Cloud Platform)
+## Current Deployment Architecture
 
-### Current Components
-- **App Engine**
-  - Flexible environment for Wiki.js
-  - Auto-scaling capabilities
-  - Easy deployment and management
+### Google Cloud Platform (GCP) Setup
+- Region: us-central1-b
+- Instance: wiki-server
+- Machine Type: e2-medium
+- OS: Ubuntu 20.04.6 LTS
 
-- **Cloud SQL (PostgreSQL)**
-  - Managed PostgreSQL instance
-  - Automated backups
-  - High availability option
+### Docker Containers
+1. **Wiki.js Application**
+   - Image: `requarks/wiki:2`
+   - Container Name: wiki-wiki-1
+   - Port Mapping: 3000:3000
+   - Status: Running (Up 4 hours)
 
-- **Cloud Storage**
-  - Store uploaded files and media
-  - Scalable storage solution
-  - CDN capabilities
+2. **PostgreSQL Database**
+   - Image: `postgres:13-alpine`
+   - Container Name: wiki-db-1
+   - Port: 5432
+   - Status: Running (Up 4 hours)
 
-- **Cloud IAM**
-  - Manage service accounts
-  - Control access permissions
-  - Security management
+### Network Configuration
+1. **Firewall Rules**
+   - `allow-wiki`: tcp:3000 (Priority 1000)
+   - `allow-http`: tcp:80 (Priority 1000)
+   - `allow-https`: tcp:443 (Priority 1000)
+   - `default-allow-internal`: tcp:0-65535, udp:0-65535, icmp
 
-## 2. User Management
+2. **Network Interfaces**
+   - Primary Internal IP: 10.128.0.2
+   - External IP: Configured for public access
 
-### Authentication Methods
-1. **Primary: Google Workspace**
-   - Single Sign-On (SSO)
-   - Automatic user provisioning
-   - Use existing company accounts
+## Maintenance Procedures
 
-2. **Secondary: Local Accounts**
-   - For external collaborators
-   - Limited access accounts
-   - Manual approval process
+### Container Management
+```bash
+# View running containers
+docker ps
 
-### User Roles
-1. **Administrators**
-   - Full system access
-   - User management
-   - Configuration control
+# Container logs
+docker logs wiki
 
-2. **Content Managers**
-   - Create/edit all content
-   - Manage categories
-   - Review changes
-
-3. **Team Leaders**
-   - Manage team spaces
-   - Approve team content
-   - View analytics
-
-4. **Regular Users**
-   - Create/edit own content
-   - Comment and collaborate
-   - View permitted content
-
-## 3. Backup and Maintenance
+# Restart containers
+docker restart wiki
+docker restart wiki-db-1
+```
 
 ### Backup Strategy
-- Daily database backups
-- Weekly full system backups
-- Monthly archive snapshots
-- Retention: 30 days rolling
+1. Database Backups
+   - Regular PostgreSQL dumps
+   - Store in Google Cloud Storage
+   - Retention policy: TBD
 
-### Maintenance Schedule
-- Weekly updates check
-- Monthly security patches
-- Quarterly performance review
-- Annual system audit
+2. Configuration Backups
+   - Version control for config files
+   - Regular export of wiki content
 
-## 4. Integration Points
+### Monitoring
+- System Resources:
+  - Current CPU Usage: Minimal
+  - Memory Usage: 10%
+  - Disk Usage: 38.8% of 9.51GB
+- Container Health Checks
+- Database Performance Monitoring
 
-### Current Systems
-- Google Workspace
-- GitHub
-- Odoo ERP
-- Project Management tools
+## Security Measures
+1. Firewall Configuration
+2. Regular Security Updates
+3. SSL/TLS Configuration (Pending)
+4. Access Control Lists
 
-### API Requirements
-- Authentication endpoints
-- Content management
-- User provisioning
-- Search integration
-
-## 5. Monitoring
-
-### Key Performance Indicators
-- User adoption rate
-- Content creation metrics
-- Search effectiveness
-- System uptime
-- Response times
-
-### Monitoring Tools
-- GCP monitoring
-- Application logs
-- User activity
-- Performance metrics
+## Troubleshooting
+Common issues and solutions:
+1. Port 3000 already in use:
+   - Check running processes
+   - Verify container status
+   - Restart if necessary
+2. Permission issues:
+   - Add user to docker group
+   - Use appropriate sudo commands
+3. Connection issues:
+   - Check firewall rules
+   - Verify container status
+   - Check logs for errors

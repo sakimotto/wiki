@@ -10,39 +10,46 @@ Setting up a modern knowledge management system using Wiki.js for team collabora
 4. Integrate with existing tools
 5. Deploy on Google Cloud
 
+## Current Setup
+
+### 1. Infrastructure
+- Google Cloud VM Instance
+- Ubuntu 20.04.6 LTS (GNU/Linux 5.15.0-1075-gcp x86_64)
+- System Resources:
+  - Disk Usage: 38.8% of 9.51GB
+  - Memory Usage: 10%
+  - IPv4 address for ens4: 10.128.0.2
+
+### 2. Docker Configuration
+- Docker containers:
+  - Wiki.js container: requarks/wiki:2 (wiki-wiki-1)
+  - PostgreSQL: postgres:13-alpine (wiki-db-1)
+- Port mappings:
+  - Wiki.js: 0.0.0.0:3000->3000/tcp
+  - PostgreSQL: 5432/tcp
+
+### 3. Firewall Rules
+- allow-wiki: tcp:3000 (Priority 1000)
+- default-allow-http: tcp:80
+- default-allow-https: tcp:443
+
 ## Setup Steps
 
-### 1. Local Development Environment
-- Based on Wiki.js version: 2.5
-- Node.js required: check `.nvmrc` for version
-
-### 2. Required Dependencies
-- Node.js
-- PostgreSQL (for database)
+### 1. Required Dependencies
+- Docker (installed and running)
 - Git (for version control)
-- Docker (optional, for containerization)
+- PostgreSQL (running in Docker)
+
+### 2. Container Setup
+```bash
+docker run -d -p 3000:3000 --name wiki requarks/wiki:2
+```
 
 ### 3. Configuration
-Base configuration file created from `config.sample.yml`. Key areas to customize:
-- Database connection
-- Authentication methods
-- Storage location
-- Search engine settings
-- Logging preferences
-
-### 4. Deployment Options
-1. **Google Cloud Platform (Current Setup)**
-   - App Engine for the application
-   - Cloud SQL for PostgreSQL
-   - Cloud Storage for assets
-   
-2. **Docker Deployment**
-   - Use official Docker image
-   - Set up with docker-compose
-   
-3. **Manual Deployment**
-   - Direct Node.js deployment
-   - PM2 for process management
+Base configuration from config.sample.yml with customizations for:
+- Database connection to PostgreSQL
+- Port configuration (3000)
+- External access settings
 
 ## Resources
 - [Official Documentation](https://docs.requarks.io/)
@@ -52,4 +59,4 @@ Base configuration file created from `config.sample.yml`. Key areas to customize
 ## Notes
 - Keep sensitive configuration in environment variables
 - Regular backups needed for database
-- Consider setting up staging environment
+- Monitor system resources (currently at 10% memory usage)
